@@ -1,7 +1,15 @@
 import telebot
 from telebot import types
-#from ..parser.links import parsingCore
+from parser.links import parsingCore
 #from ..parser.parser import parsing
+
+#Заготовка категорий
+categoryButtons = {}
+iButton = 1
+for key in parsingCore:
+    categoryButtons[iButton] = key
+    iButton += 1
+chosenCategories = []
 
 TOKEN = 'BOT_API_TOKEN'
 bot = telebot.TeleBot(TOKEN)
@@ -37,11 +45,24 @@ def getOption(message):
                    'После вам выдаст список категорий, которые вы хотите найти, в формате [бренд]-[пол]. ' \
                    'Выберете необходимые категории и начните поиск'
         bot.send_message(CHAT_ID, helpText)
-    #Использование функций парсинга
+    #Отбор категорий для парсинга
     elif message.text == 'Поиск':
-        pass
-        buttons = {}
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        #Создает inline-кнопки исходя из категорий в файле parser/links.py
+        for key in categoryButtons:
+            markup.add(types.InlineKeyboardButton(categoryButtons[key], callback_data=categoryButtons[key]))
+        bot.send_message(CHAT_ID, 'Выбери категории', reply_markup=markup)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        #ПРОДОЛЖЕНИЕ 
+        markup.add(types.KeyboardButton('Начать парсинг'))
+        bot.send_message(CHAT_ID, 'После нажми "Начать парсинг":', reply_markup=markup)
+    elif message.text == 'Начать парсинг':
+        pass
+        #ПРОДОЛЖЕНИЕ
+        
+@bot.callback_query_handler(func=lambda c:True)
+def getOption(c):
+    #Добавление выбранных категорий в список для парсинга
+    chosenCategories.append(c.data)
+    #ЗДЕСЬ ПРОПИСАТЬ ИСКЛЮЧЕНИЕ, ЕСЛИ БУДУТ ВЫБРАН ПОВТОРНО ОДИНАКОВЫЕ КАТЕГОРИИ, ЧТОБЫ НЕ БЫЛО ЛИШНЕГО ПАРСИНГА
 
 bot.polling(none_stop=True, interval=0)
