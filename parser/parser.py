@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
 
-from links import parsingCore
+from .links import parsingCore
 
 #Класс для нашего условного блока товара
 class Sneaker:
@@ -40,14 +40,13 @@ def parsing(categories: list):
                 sneakers[nameKey].name = product.find("div", class_="x-product-card-description__product-name").text
                 #При запросе выгружается только 12 картинок, остальные нужно выгрузить уже со страницы самого товара. Пока оставляю так
                 try:
-                    sneakers[nameKey].image = product.find("img").get('src')
+                    sneakers[nameKey].image = product.find("img").get('src')[2:]
                 except AttributeError:
                     pass
                 sneakers[nameKey].source = 'https://www.lamoda.ru' + product.a.get('href')
                 sneakers[nameKey].newPrice = product.find("span", class_="x-product-card-description__price-new x-product-card-description__price-WEB8507_price_no_bold").text
                 sneakers[nameKey].oldPrice = product.find("span", class_="x-product-card-description__price-old").text
                 iName += 1
-                print(str(iName) + ' ', sneakers[nameKey].name)
             page += 1
             soupPage = takeHTML(parsingCore[category], page)
     return sneakers
